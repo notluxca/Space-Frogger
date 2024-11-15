@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 public class PlayerController : MonoBehaviour
 {
     private float moveSpeed = 10f;
@@ -11,9 +10,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] int maxLanesX = 2; // Número de faixas no eixo X
     [SerializeField] int maxLanesY = 2; // Número de faixas no eixo Y
     [SerializeField] float smoothTime = 0.2f;
+    [SerializeField] float maxTiltAngle = 15f; // Maximum tilt angle based on velocity
+    [SerializeField] float tiltSpeed = 5f;   // Speed of tilting back to neutral
+
+    [SerializeField] AudioClip explosionSound;
+    [SerializeField] AudioClip moveSound;
+    AudioSource audioSource;
 
     private int currentLaneX = 0;
-    private int currentLaneY = 0; //* 0 é o nivel mais baixo da Lane
+    private int currentLaneY = 0;
 
     private Vector3 targetPosition;
     private Vector3 velocity = Vector3.zero;
@@ -22,14 +27,14 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private bool isFrozen;
 
-
     void Start()
     {
+
         isFrozen = false;
-        // Definir a posição inicial do player na última faixa inferior do eixo Y
         particleSystem = GetComponent<ParticleSystem>();
         rigidbody2D = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        audioSource = GetComponent<AudioSource>();
         currentLaneY = -maxLanesY;
         targetPosition = new Vector3(currentLaneX * laneDistanceX, currentLaneY * laneDistanceY, transform.position.z);
         transform.position = targetPosition; // Garantir que o player comece na posição correta
@@ -37,9 +42,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (isFrozen) return;
 
-        if (isFrozen == true) return;
-        // Detectar entrada do jogador para o eixo X
+        // Detect horizontal input and update lane position
         if (Input.GetKeyDown(KeyCode.A) && currentLaneX > -maxLanesX)
         {
             currentLaneX--;
@@ -51,19 +56,29 @@ public class PlayerController : MonoBehaviour
             SetTargetPosition();
         }
 
-        // Detectar entrada do jogador para o eixo Y
+        // Detect vertical input for lane position (no tilt adjustment here)
         if (Input.GetKeyDown(KeyCode.W))
         {
+
             currentLaneY++;
             SetTargetPosition();
         }
 
-        // Mover suavemente o player para a posição alvo usando SmoothDamp
+        // Smoothly move to the target position using SmoothDamp
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
+
+        // Calculate tilt based on X velocity
+        float tiltAngle = Mathf.Clamp(-velocity.x / laneDistanceX * maxTiltAngle, -maxTiltAngle, maxTiltAngle);
+
+        // Smoothly apply tilt based on the calculated angle
+        Quaternion targetRotation = Quaternion.Euler(0, 0, tiltAngle);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * tiltSpeed);
     }
 
     void SetTargetPosition()
     {
+        audioSource.clip = moveSound;
+        audioSource.Play();
         targetPosition = new Vector3(currentLaneX * laneDistanceX, currentLaneY * laneDistanceY, transform.position.z);
     }
 
@@ -71,11 +86,6 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Obstacle"))
         {
-            //! game over
-            // destroy player
-            // particle explosion
-            // explosion sound
-            // restart scene (game manager?)
             StartCoroutine(DeathSequence());
         }
     }
@@ -87,15 +97,15 @@ public class PlayerController : MonoBehaviour
         spriteRenderer.enabled = false;
         rigidbody2D.constraints = RigidbodyConstraints2D.FreezePosition;
         rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
+        audioSource.clip = explosionSound;
+        audioSource.Play();
         GetComponent<TrailRenderer>().enabled = false;
+        GetComponent<BoxCollider2D>().enabled = false;
+        GetComponent<DangerDetector>().enabled = false;
         yield return new WaitForSeconds(1);
         UIManager.Instance.FadeToBlack();
         yield return new WaitForSeconds(1);
-        Debug.Log(SceneManager.GetActiveScene().buildIndex);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        Destroy(this.gameObject); //! inves de destruir, desativar o sprite renderer
+        Destroy(this.gameObject);
     }
-
-
-
 }
