@@ -3440,7 +3440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nextLevelName: Level2
-  timeCooldown: 0
+  timeCooldown: 1
 --- !u!61 &2140398591
 BoxCollider2D:
   m_ObjectHideFlags: 0

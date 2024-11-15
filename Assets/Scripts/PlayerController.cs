@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rigidbody2D;
     private SpriteRenderer spriteRenderer;
     private bool isFrozen;
+    public bool canMoveFoward = true;
+    public float moveFowardCooldown;
 
     void Start()
     {
@@ -57,11 +59,11 @@ public class PlayerController : MonoBehaviour
         }
 
         // Detect vertical input for lane position (no tilt adjustment here)
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W) && canMoveFoward)
         {
-
             currentLaneY++;
             SetTargetPosition();
+            ; StartCoroutine(MoveFowardCooldown());
         }
 
         // Smoothly move to the target position using SmoothDamp
@@ -107,5 +109,12 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(1);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         Destroy(this.gameObject);
+    }
+
+    IEnumerator MoveFowardCooldown()
+    {
+        canMoveFoward = false;
+        yield return new WaitForSeconds(moveFowardCooldown);
+        canMoveFoward = true;
     }
 }

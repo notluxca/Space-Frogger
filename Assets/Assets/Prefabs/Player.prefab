@@ -116,6 +116,8 @@ MonoBehaviour:
   tiltSpeed: 20
   explosionSound: {fileID: 8300000, guid: 3ea7df4fd2b00a3418c1612c50c182d9, type: 3}
   moveSound: {fileID: 8300000, guid: 5a6bfc350c84e2c4281d8ac52f9df0c3, type: 3}
+  canMoveFoward: 1
+  moveFowardCooldown: 0.5
 --- !u!81 &8798979538730605871
 AudioListener:
   m_ObjectHideFlags: 0
