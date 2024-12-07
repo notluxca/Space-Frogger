@@ -46,25 +46,25 @@ public class PlayerController : MonoBehaviour
     {
         if (isFrozen) return;
 
-        // Detect horizontal input and update lane position
-        if (Input.GetKeyDown(KeyCode.A) && currentLaneX > -maxLanesX)
-        {
-            currentLaneX--;
-            SetTargetPosition();
-        }
-        else if (Input.GetKeyDown(KeyCode.D) && currentLaneX < maxLanesX)
-        {
-            currentLaneX++;
-            SetTargetPosition();
-        }
+        // // Detect horizontal input and update lane position
+        // if (Input.GetKeyDown(KeyCode.A) && currentLaneX > -maxLanesX)
+        // {
+        //     currentLaneX--;
+        //     SetTargetPosition();
+        // }
+        // else if (Input.GetKeyDown(KeyCode.D) && currentLaneX < maxLanesX)
+        // {
+        //     currentLaneX++;
+        //     SetTargetPosition();
+        // }
 
-        // Detect vertical input for lane position (no tilt adjustment here)
-        if (Input.GetKeyDown(KeyCode.W) && canMoveFoward)
-        {
-            currentLaneY++;
-            SetTargetPosition();
-            ; StartCoroutine(MoveFowardCooldown());
-        }
+        // // Detect vertical input for lane position (no tilt adjustment here)
+        // if (Input.GetKeyDown(KeyCode.W) && canMoveFoward)
+        // {
+        //     currentLaneY++;
+        //     SetTargetPosition();
+        //     ; StartCoroutine(MoveFowardCooldown());
+        // }
 
         // Smoothly move to the target position using SmoothDamp
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
@@ -82,6 +82,32 @@ public class PlayerController : MonoBehaviour
         audioSource.clip = moveSound;
         audioSource.Play();
         targetPosition = new Vector3(currentLaneX * laneDistanceX, currentLaneY * laneDistanceY, transform.position.z);
+    }
+
+    public void MoveUp(){
+        // Detect vertical input for lane position (no tilt adjustment here)
+        if (canMoveFoward)
+        {
+            currentLaneY++;
+            SetTargetPosition();
+            ; StartCoroutine(MoveFowardCooldown());
+        }
+    }
+
+    public void MoveLeft(){
+        if (currentLaneX > -maxLanesX)
+        {
+            currentLaneX--;
+            SetTargetPosition();
+        }
+    }
+
+    public void MoveRight(){
+        if (currentLaneX < maxLanesX)
+        {
+            currentLaneX++;
+            SetTargetPosition();
+        }
     }
 
     void OnCollisionEnter2D(Collision2D other)
