@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class AudioController : MonoBehaviour
 {
+   // salve Luquinhas, apaga isso aq depois, vapo vapo, tudo pelo streak , sexoooo
     public Transform target;
     public float maxDistance = 10f; // Distância máxima para o som ser audível
     public float minDistance = 1f;  // Distância mínima para o volume máximo e pitch mais alto
